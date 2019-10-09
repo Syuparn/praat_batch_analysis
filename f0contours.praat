@@ -1,6 +1,7 @@
 ###################################################################
 #                      f0contours.praat                           #
 # ディレクトリ内各wavファイルのF0系列を同名のcsvに出力                #
+# (無声区間のF0は--undefined--と表記)                               #
 ###################################################################
 
 
@@ -71,29 +72,25 @@ endproc
 
 
 procedure makeF0ContourTable(.soundObj)
+    # NOTE: unvoiced frame F0 is shown as "--undefined--"
+
     selectObject: .soundObj
     # extract F0 contour from .soundObj
     .pitchObj = do("To Pitch...", frameStepTime, f0Floor, f0Ceil)
-    .nFrames = do("Get number of frames")
+    .frameStepTime = if frameStepTime then frameStepTime else 0.01 endif
+    .times# = to#(do("Get end time") / .frameStepTime) * .frameStepTime
+    # NOTE: use old style because do#() has not implemented yet...
+	.f0s# = List values at times: .times#, "hertz", "linear"
 
     # make table for F0 contour
     .tableObj = do("Create Table with column names...",
-	...            "F0countour '.soundObj'", .nFrames, "t[s] F0[Hz]")
+	...            "F0countour '.soundObj'", size(.f0s#), "t[s] F0[Hz]")
 	#               obj name                 num of rows  columns
+    selectObject(.tableObj)
 
-    for .frame from 1 to .nFrames
-		selectObject(.pitchObj)
-        .t = do("Get time from frame number...", .frame)
-        .f0 = do("Get value in frame...", .frame, "Hertz")
-        
-        #分析結果を.tableObjに格納
-		selectObject(.tableObj)
-		do("Set numeric value...", .frame, "t[s]", .t)
-		# NOTE: NaNの互換性のためF0をstringに変換しテーブルに格納
-        # (F0がundefined(=unvoiced)のとき,セルを"undefined"ではなく
-        # ""(NaNとして扱われる)にするため)
-        do("Set string value...", .frame, "F0[Hz]",
-        ... if .f0 == undefined then "" else string$(.f0) endif)
+    for .frame from 1 to size(.f0s#)
+		do("Set numeric value...", .frame, "t[s]", .times#[.frame])
+        do("Set numeric value...", .frame, "F0[Hz]", .f0s#[.frame])
     endfor
 
 	removeObject(.pitchObj)
