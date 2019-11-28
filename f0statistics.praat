@@ -26,6 +26,7 @@ form directory path
     comment save result table to:
     text saveResultTo f0results.csv
 
+    # F0生成時(To Pitch...)に使用。デフォルト値はPraatのデフォルト値を使用
     comment F0 extract parameters:
     positive F0Floor(Hz) 75
     positive F0Ceil(Hz) 600

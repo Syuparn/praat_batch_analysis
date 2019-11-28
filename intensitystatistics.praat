@@ -27,6 +27,7 @@ form directory path
     comment save result table to:
     text saveResultTo intensityresults.csv
 
+    # インテンシティ生成時(To Intensity...)に使用。デフォルト値はPraatのデフォルト値を使用
     comment Intensity extract parameters:
     positive F0Min(Hz) 100
     real FrameStepTime(s) 0

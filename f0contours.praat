@@ -23,6 +23,8 @@ do("Text writing preferences...", "UTF-8")
 form directory path
     # 分析したい音声が入っているディレクトリのパス: directory$に格納
     text directory
+	
+    # F0生成時(To Pitch...)に使用。デフォルト値はPraatのデフォルト値を使用
     comment F0 extract parameters:
     positive F0Floor(Hz) 75
     positive F0Ceil(Hz) 600
