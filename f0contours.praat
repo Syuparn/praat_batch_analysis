@@ -21,8 +21,8 @@ do("Text writing preferences...", "UTF-8")
 
 # 引数をフォーム(GUI)で受け取る
 form directory path
-	# 分析したい音声が入っているディレクトリのパス: directory$に格納
-	text directory
+    # 分析したい音声が入っているディレクトリのパス: directory$に格納
+    text directory
     comment F0 extract parameters:
     positive F0Floor(Hz) 75
     positive F0Ceil(Hz) 600
@@ -33,41 +33,41 @@ endform
 @main(directory$)
 
 
-procedure main(.wavDirectoryPath$)	
-	# wavファイル名を取得
-	@filesObj(.wavDirectoryPath$, "/*.wav")
-	.wavNamesObj = filesObj.return
-	.numFiles = do("Get number of strings")
+procedure main(.wavDirectoryPath$)    
+    # wavファイル名を取得
+    @filesObj(.wavDirectoryPath$, "/*.wav")
+    .wavNamesObj = filesObj.return
+    .numFiles = do("Get number of strings")
 
-	.tableObj = do("Create Table with column names...",
-	...            "stats", .numFiles, "file mean max min")
-	#              obj name  num of rows  columns
+    .tableObj = do("Create Table with column names...",
+    ...            "stats", .numFiles, "file mean max min")
+    #              obj name  num of rows  columns
 
 
-	# 各wavファイルを分析し、結果を.tableObjに記入
-	for .i to .numFiles
-		.wavName$ = object$[.wavNamesObj, .i]
-    	.soundObj = do("Read from file...",
-		...            .wavDirectoryPath$ + "/" + .wavName$)
-		
-		# .soundObjのF0分析
-		@makeF0ContourTable(.soundObj)
+    # 各wavファイルを分析し、結果を.tableObjに記入
+    for .i to .numFiles
+        .wavName$ = object$[.wavNamesObj, .i]
+        .soundObj = do("Read from file...",
+        ...            .wavDirectoryPath$ + "/" + .wavName$)
+        
+        # .soundObjのF0分析
+        @makeF0ContourTable(.soundObj)
         .tableObj = makeF0ContourTable.return
-		removeObject(.soundObj)
+        removeObject(.soundObj)
 
         .csvName$ = .wavName$ - ".wav" + ".csv"
-    	selectObject(.tableObj)
+        selectObject(.tableObj)
         do("Save as comma-separated file...",
-	    ... .wavDirectoryPath$ + "/" + .csvName$)
-		removeObject(.tableObj)
-	endfor
+        ... .wavDirectoryPath$ + "/" + .csvName$)
+        removeObject(.tableObj)
+    endfor
 endproc
 
 
 procedure filesObj(.dirPath$, .glob$)
-	# デバッグしやすいようにオブジェクト名を.dirPath$にする
-	.return = do("Create Strings as file list...",
-	...          .dirPath$, .dirPath$ + .glob$)
+    # デバッグしやすいようにオブジェクト名を.dirPath$にする
+    .return = do("Create Strings as file list...",
+    ...          .dirPath$, .dirPath$ + .glob$)
 endproc
 
 
@@ -80,19 +80,19 @@ procedure makeF0ContourTable(.soundObj)
     .frameStepTime = if frameStepTime then frameStepTime else 0.01 endif
     .times# = to#(do("Get end time") / .frameStepTime) * .frameStepTime
     # NOTE: use old style because do#() has not implemented yet...
-	.f0s# = List values at times: .times#, "hertz", "linear"
+    .f0s# = List values at times: .times#, "hertz", "linear"
 
     # make table for F0 contour
     .tableObj = do("Create Table with column names...",
-	...            "F0countour '.soundObj'", size(.f0s#), "t[s] F0[Hz]")
-	#               obj name                 num of rows  columns
+    ...            "F0countour '.soundObj'", size(.f0s#), "t[s] F0[Hz]")
+    #               obj name                 num of rows  columns
     selectObject(.tableObj)
 
     for .frame from 1 to size(.f0s#)
-		do("Set numeric value...", .frame, "t[s]", .times#[.frame])
+        do("Set numeric value...", .frame, "t[s]", .times#[.frame])
         do("Set numeric value...", .frame, "F0[Hz]", .f0s#[.frame])
     endfor
 
-	removeObject(.pitchObj)
+    removeObject(.pitchObj)
     .return = .tableObj
 endproc
